@@ -48,6 +48,7 @@ public class CFGProcessor {
     private static final Map<String, MethodDeclaration> methodMap = new HashMap<>();
     private static final List<String> graphLines = new LinkedList<>();
     private final LinkedList<Integer> endNodeStack = new LinkedList<>();
+    private static boolean isFirstMethod = true; // Add this flag
 
     public static void main(String[] args) {
 
@@ -73,6 +74,7 @@ public class CFGProcessor {
             CompilationUnit cu = parseResult.getResult().get();
 
             graphLines.add("digraph G {");
+            graphLines.add("\tnode0 [label=\"Start\"];"); // Initialize with a start node
 
             cu.accept(new DeclarationCollector(), null);
 
@@ -144,6 +146,14 @@ public class CFGProcessor {
 
         @Override
         public void visit(MethodDeclaration n, Void arg) {
+
+            if (isFirstMethod) {
+                // Directly connect the start node to this method's entry node
+                isFirstMethod = false; // Set to false to indicate the first method has been processed
+            }
+            
+            // Your existing method visiting logic here
+            super.visit(n, arg);
             // Method body is now visited directly without adding a separate node for the method declaration
             n.getBody().ifPresent(body -> body.accept(this, null));
         }
