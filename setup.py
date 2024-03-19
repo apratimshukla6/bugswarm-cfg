@@ -6,7 +6,7 @@ with open('README.md', 'r', encoding='utf-8') as f:
 
 setup(
     name='bugswarm-cfg',
-    version='0.6.0',
+    version='0.7.0',
     packages=find_packages(),
     include_package_data=True,
     entry_points={
