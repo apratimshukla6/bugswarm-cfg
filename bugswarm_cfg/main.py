@@ -104,6 +104,8 @@ def move_output_to_host(tool, image_tag, script_directory):
         script_path = "Spoon"
     elif tool == "javaparser":
         script_path = "JavaParser"
+    elif tool == "soot":
+        script_path = "Soot"
     source_dir = os.path.join(HOST_SANDBOX_DEFAULT, f"{script_path}/{image_tag.split(':')[1]}")
     target_dir = os.path.join(os.getcwd(), f"cfgs/{script_path}/{image_tag.split(':')[1]}")
 
@@ -146,6 +148,8 @@ def copy_and_execute_script_directly(tool, image_tag=None, script_directory=None
         script_name = "spoon.sh"
     elif tool == "javaparser":
         script_name = "javaparser.sh"
+    elif tool == "soot":
+        script_name = "soot.sh"
 
     home_dir = get_container_home_directory(container_name)
     build_dir = f"{home_dir}/build"
