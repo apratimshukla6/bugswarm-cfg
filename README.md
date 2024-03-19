@@ -1,7 +1,7 @@
-# bugswarm-spoon
+# BugSwarm CFG
 
-## To generate CFG:
-`mvn compile exec:java -Dexec.mainClass="com.example.RunSpoon"`
+## To run BugSwarm CFG generation with Spoon
+```bugswarm-cfg --image-tag dromara-hertzbeat-12624254643 --tool spoon```
 
-## To generate the PNG from the DOT file:
-`dot -Tpng cfg.dot -o cfg.png`
+## To run BugSwarm CFG generation with JavaParser
+```bugswarm-cfg --image-tag dromara-hertzbeat-12624254643 --tool javaparser```
