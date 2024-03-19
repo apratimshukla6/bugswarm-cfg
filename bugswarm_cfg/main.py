@@ -105,7 +105,7 @@ def move_output_to_host(tool, image_tag, script_directory):
     elif tool == "javaparser":
         script_path = "JavaParser"
     source_dir = os.path.join(HOST_SANDBOX_DEFAULT, f"{script_path}/{image_tag.split(':')[1]}")
-    target_dir = os.path.join(script_directory, f"cfgs/{script_path}/{image_tag.split(':')[1]}")
+    target_dir = os.path.join(os.getcwd(), f"cfgs/{script_path}/{image_tag.split(':')[1]}")
 
     # Ensure target directory exists
     os.makedirs(target_dir, exist_ok=True)

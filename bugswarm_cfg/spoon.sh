@@ -327,69 +327,43 @@ display_time() {
 echo "Processing Java files..."
 echo "Estimated time to finish: $(display_time $estimated_seconds) based on $total_files files."
 
-find ${MAIN}/build/failed/ -type f -name "*.java" | while read java_file; do
-    counter=$((counter+1))
-    echo "Processing file $counter of $total_files..."
-    remaining_files=$((total_files - counter))
-    remaining_seconds=$((remaining_files * 3))
-    echo "Estimated time left: $(display_time $remaining_seconds)"
+process_java_files() {
+    local source_dir=$1
+    find ${MAIN}/build/${source_dir}/ -type f -name "*.java" | while read java_file; do
+        counter=$((counter + 1))
+        echo "Processing file $counter of $total_files..."
+        remaining_files=$((total_files - counter))
+        remaining_seconds=$((remaining_files * 3))
+        echo "Estimated time left: $(display_time $remaining_seconds)"
 
-    # Calculate the directory structure for the output file
-    relative_path="${java_file#${MAIN}/build/}"
-    output_dir="/bugswarm-sandbox/Spoon/${output_dir_name}/$(dirname "$relative_path")"
-    mkdir -p "$output_dir"
+        # Calculate the directory structure for the output file
+        relative_path="${java_file#${MAIN}/build/}"
+        output_dir="/bugswarm-sandbox/Spoon/${output_dir_name}/$(dirname "$relative_path")"
+        mkdir -p "$output_dir"
 
-    # Copy the Java file to the Spoon project
-    cp "$java_file" ${MAIN}/build/Spoon/src/main/java/com/example/
+        # Copy the Java file to the Spoon project
+        cp "$java_file" ${MAIN}/build/Spoon/src/main/java/com/example/
 
-    # Run RunSpoon.java
-    (cd ${MAIN}/build/Spoon && mvn exec:java -Dexec.mainClass="com.example.RunSpoon" > /dev/null 2>&1)
+        # Run RunSpoon.java
+        (cd ${MAIN}/build/Spoon && mvn exec:java -Dexec.mainClass="com.example.RunSpoon" > /dev/null 2>&1)
 
-    # Find the newest .dot file after running and move it if present
-    latest_dot_file_after=$(find ${MAIN}/build/Spoon/ -type f -name "*.dot" -printf "%T+ %p\n" | sort -r | head -n 1 | cut -d' ' -f2-)
-    if [[ -f "$latest_dot_file_after" ]]; then
-        mv "$latest_dot_file_after" "$output_dir/$(basename "$java_file" .java).dot"
-        echo "Moved: $(basename "$java_file" .java).dot"
-    else
-        echo "No .dot file generated for $(basename "$java_file")"
-    fi
+        # Find the newest .dot file after running and move it if present
+        latest_dot_file=$(find ${MAIN}/build/Spoon/ -type f -name "*.dot" -printf "%T+ %p\n" | sort -r | head -n 1 | cut -d' ' -f2-)
+        if [[ -f "$latest_dot_file" ]]; then
+            mv "$latest_dot_file" "$output_dir/$(basename "$java_file" .java).dot"
+            echo "Moved: $(basename "$java_file" .java).dot"
+        else
+            echo "No .dot file generated for $(basename "$java_file")"
+        fi
 
-    # Delete the copied Java file
-    rm ${MAIN}/build/Spoon/src/main/java/com/example/"$(basename "$java_file")"
-done
+        # Delete the copied Java file
+        rm ${MAIN}/build/Spoon/src/main/java/com/example/"$(basename "$java_file")"
+    done
+}
 
-# Step 4: Traverse ${MAIN}/build/passed/ to find Java files, copy them, run RunSpoon, and handle the output
-find ${MAIN}/build/passed/ -type f -name "*.java" | while read java_file; do
-    counter=$((counter+1))
-    echo "Processing file $counter of $total_files..."
-    remaining_files=$((total_files - counter))
-    remaining_seconds=$((remaining_files * 3))
-    echo "Estimated time left: $(display_time $remaining_seconds)"
-
-    # Calculate the directory structure for the output file
-    relative_path="${java_file#${MAIN}/build/}"
-    output_dir="/bugswarm-sandbox/Spoon/${output_dir_name}/$(dirname "$relative_path")"
-    mkdir -p "$output_dir"
-
-    # Copy the Java file to the Spoon project
-    cp "$java_file" ${MAIN}/build/Spoon/src/main/java/com/example/
-
-    # Run RunSpoon.java
-    (cd ${MAIN}/build/Spoon && mvn exec:java -Dexec.mainClass="com.example.RunSpoon" > /dev/null 2>&1)
-
-    # Find the newest .dot file after running and move it if present
-    latest_dot_file_after=$(find ${MAIN}/build/Spoon/ -type f -name "*.dot" -printf "%T+ %p\n" | sort -r | head -n 1 | cut -d' ' -f2-)
-    if [[ -f "$latest_dot_file_after" ]]; then
-        mv "$latest_dot_file_after" "$output_dir/$(basename "$java_file" .java).dot"
-        echo "Moved: $(basename "$java_file" .java).dot"
-    else
-        echo "No .dot file generated for $(basename "$java_file")"
-    fi
-
-    # Delete the copied Java file
-    rm ${MAIN}/build/Spoon/src/main/java/com/example/"$(basename "$java_file")"
-done
-
+# Process both failed and passed directories without resetting the counter or time
+process_java_files "failed"
+process_java_files "passed"
 
 end_time=$(date +%s) # Capture the end time of the script
 elapsed=$((end_time - start_time)) # Calculate the elapsed time
