@@ -152,8 +152,6 @@ public class CFGProcessor {
                 isFirstMethod = false; // Set to false to indicate the first method has been processed
             }
             
-            // Your existing method visiting logic here
-            super.visit(n, arg);
             // Method body is now visited directly without adding a separate node for the method declaration
             n.getBody().ifPresent(body -> body.accept(this, null));
         }
